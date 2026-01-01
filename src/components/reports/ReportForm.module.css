@@ -1,0 +1,197 @@
+.form {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+}
+
+.form h2 {
+    font-size: var(--text-xl);
+    margin-bottom: var(--space-xs);
+}
+
+.subtitle {
+    color: var(--color-text-tertiary);
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-lg);
+}
+
+.error {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background: var(--color-error-bg);
+    border: 1px solid rgba(255, 82, 82, 0.3);
+    border-radius: var(--radius-md);
+    color: var(--color-error);
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-lg);
+}
+
+.section {
+    margin-bottom: var(--space-xl);
+}
+
+.label {
+    display: block;
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    color: var(--color-text-secondary);
+    margin-bottom: var(--space-md);
+}
+
+.reasonGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-sm);
+}
+
+.reasonBtn {
+    padding: var(--space-md);
+    background: var(--color-bg-tertiary);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-secondary);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    text-align: left;
+}
+
+.reasonBtn:hover {
+    border-color: var(--color-border-light);
+}
+
+.reasonBtn.selected {
+    border-color: var(--color-error);
+    background: var(--color-error-bg);
+    color: var(--color-error);
+}
+
+.textarea {
+    width: 100%;
+    padding: var(--space-md);
+    background: var(--color-bg-tertiary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    color: var(--color-text-primary);
+    font-size: var(--text-sm);
+    resize: vertical;
+}
+
+.textarea:focus {
+    outline: none;
+    border-color: var(--color-accent-primary);
+}
+
+.hint {
+    font-size: var(--text-sm);
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-md);
+}
+
+.whatsappLink {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-md) var(--space-lg);
+    background: #25D366;
+    color: white;
+    text-decoration: none;
+    font-weight: var(--font-medium);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.whatsappLink:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+}
+
+.actions {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: flex-end;
+}
+
+.cancelBtn {
+    padding: var(--space-md) var(--space-xl);
+    background: transparent;
+    color: var(--color-text-secondary);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.cancelBtn:hover {
+    background: var(--color-bg-tertiary);
+}
+
+.submitBtn {
+    padding: var(--space-md) var(--space-xl);
+    background: var(--color-error);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.submitBtn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(255, 82, 82, 0.3);
+}
+
+.submitBtn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Success */
+.success {
+    text-align: center;
+    padding: var(--space-2xl);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+}
+
+.successIcon {
+    font-size: 4rem;
+    display: block;
+    margin-bottom: var(--space-lg);
+}
+
+.success h3 {
+    font-size: var(--text-xl);
+    margin-bottom: var(--space-sm);
+}
+
+.success p {
+    color: var(--color-text-tertiary);
+    margin-bottom: var(--space-lg);
+}
+
+.backBtn {
+    padding: var(--space-md) var(--space-xl);
+    background: var(--color-bg-tertiary);
+    color: var(--color-text-primary);
+    border: none;
+    border-radius: var(--radius-md);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+}
+
+@media (max-width: 768px) {
+    .reasonGrid {
+        grid-template-columns: 1fr;
+    }
+
+    .actions {
+        flex-direction: column-reverse;
+    }
+}

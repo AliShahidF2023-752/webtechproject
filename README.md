@@ -1,36 +1,133 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Sports Matchmaking & Venue Booking App
 
-## Getting Started
+A skill-based sports matchmaking platform for Pakistan with venue booking, player ratings (ELO), behavior profiling, and admin-controlled monetization.
 
-First, run the development server:
+## 🚀 Quick Start
+
+### Prerequisites
+
+- Node.js 18+
+- npm or yarn
+- Supabase account
+
+### Installation
 
 ```bash
+# Install dependencies
+npm install
+
+# Copy environment file
+cp env.example .env.local
+
+# Edit .env.local with your Supabase credentials
+# Then run the development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Database Setup
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Follow the [Supabase Setup Guide](./SUPABASE_SETUP.md) to configure your database.
 
-## Learn More
+## 📁 Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+src/
+├── app/                    # Next.js App Router pages
+│   ├── admin/             # Admin dashboard
+│   ├── auth/              # Authentication pages
+│   ├── bookings/          # Booking management
+│   ├── dashboard/         # Player dashboard
+│   ├── matchmaking/       # Matchmaking interface
+│   ├── profile/           # Profile management
+│   ├── venues/            # Venue listings
+│   └── api/               # API routes
+├── components/            # Reusable components
+│   ├── layout/            # Navbar, Footer
+│   └── maps/              # Leaflet map components
+├── lib/                   # Utilities & helpers
+│   ├── supabase/          # Supabase clients
+│   ├── elo.ts             # ELO rating calculations
+│   └── analytics.ts       # Analytics tracking
+├── styles/                # Global CSS
+└── types/                 # TypeScript definitions
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+supabase/
+└── migrations/            # SQL migration files
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## ✨ Features
 
-## Deploy on Vercel
+### For Players
+- 🎯 Skill-based matchmaking with ELO ratings
+- 📍 Find nearby venues with radius search
+- 📅 Book courts and schedule matches
+- 💬 In-app chat with opponents
+- ⭐ Rate and review players
+- 📊 Track your stats and progress
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### For Admins
+- 🗺️ Manage venues via interactive map
+- 👥 User management and roles
+- 💳 Payment verification dashboard
+- 📈 Analytics and visitor tracking
+- 🚨 Report moderation system
+- ⚙️ System configuration
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+### Supported Sports (Phase 1)
+- 🏓 Table Tennis
+- 🏸 Badminton
+
+## 🛠️ Tech Stack
+
+- **Frontend**: Next.js 14, TypeScript, CSS Modules
+- **Backend**: Supabase (PostgreSQL, Auth, Realtime, Storage)
+- **Maps**: Leaflet + OpenStreetMap
+- **Charts**: Recharts
+
+## 📱 Responsive Design
+
+The application is built with a mobile-first responsive design, optimized for both smartphones and desktop browsers.
+
+## 🔐 Authentication
+
+- Email/password authentication
+- Password recovery flow
+- Role-based access control (Player, Vendor, Admin)
+
+## 💰 Payment System
+
+- Bank transfer payment with screen screenshot verification
+- WhatsApp integration for payment proof
+- Admin verification dashboard
+
+## 📊 Analytics
+
+- Visitor tracking (page views, sessions)
+- Interaction heatmaps (clicks, scrolls)
+- Admin analytics dashboard
+
+## 🧪 Development
+
+```bash
+# Run development server
+npm run dev
+
+# Build for production
+npm run build
+
+# Start production server
+npm start
+
+# Run linting
+npm run lint
+```
+
+## 📄 License
+
+This project is for educational and academic purposes.
+
+---
+
+Built with ❤️ for Pakistan's sports community
