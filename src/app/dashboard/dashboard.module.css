@@ -9,6 +9,35 @@
     margin: 0 auto;
 }
 
+/* Setup Prompt */
+.setupPrompt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--space-3xl) var(--space-xl);
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    max-width: 500px;
+    margin: var(--space-2xl) auto;
+}
+
+.setupIcon {
+    font-size: 4rem;
+    margin-bottom: var(--space-lg);
+}
+
+.setupPrompt h1 {
+    margin-bottom: var(--space-md);
+}
+
+.setupPrompt p {
+    color: var(--color-text-tertiary);
+    margin-bottom: var(--space-xl);
+}
+
 .header {
     display: flex;
     justify-content: space-between;
