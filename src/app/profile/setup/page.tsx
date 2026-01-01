@@ -47,8 +47,10 @@ export default function ProfileSetupPage() {
                     .single()
 
                 if (profile?.is_profile_complete) {
-                    // Profile already complete, redirect to dashboard
-                    window.location.href = '/dashboard'
+                    // Profile already complete - DO NOT REDIRECT AUTOMATICALLY
+                    // This prevents the infinite loop if the dashboard thinks profile is incomplete
+                    console.log('Profile is complete. Stopping auto-redirect.')
+                    setCheckingProfile(false)
                     return
                 }
 

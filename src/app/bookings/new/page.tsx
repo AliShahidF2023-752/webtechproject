@@ -31,14 +31,78 @@ function NewBookingForm() {
     const [bookingDate, setBookingDate] = useState(new Date().toISOString().split('T')[0])
     const [bookingTime, setBookingTime] = useState('17:00')
     const [duration, setDuration] = useState(60)
+    const [bookingCredit, setBookingCredit] = useState<any>(null)
 
     const courtId = searchParams.get('court')
+    const matchId = searchParams.get('match')
 
     useEffect(() => {
-        if (courtId) {
-            loadCourt(courtId)
+        const init = async () => {
+            await checkCredit()
+
+            if (matchId) {
+                await loadMatch(matchId)
+            } else if (courtId) {
+                await loadCourt(courtId)
+            }
         }
-    }, [courtId])
+        init()
+    }, [courtId, matchId])
+
+    const checkCredit = async () => {
+        const supabase = createClient()
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) return
+
+        // Find verified orphaned bookings
+        const { data } = await supabase
+            .from('bookings')
+            .select('*')
+            .eq('user_id', user.id)
+            .eq('payment_status', 'verified')
+            .is('match_id', null)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single()
+
+        if (data) {
+            setBookingCredit(data)
+        }
+    }
+
+    const loadMatch = async (id: string) => {
+        const supabase = createClient()
+        const { data: match } = await supabase
+            .from('matches')
+            .select(`
+                *,
+                court:courts(
+                    id, name, hourly_rate, capacity,
+                    sport:sports(name, icon),
+                    venue:venues(id, name, city)
+                )
+            `)
+            .eq('id', id)
+            .single()
+
+        if (match && match.court) {
+            // Pre-fill from match
+            setBookingDate(match.scheduled_date)
+            setBookingTime(match.scheduled_time)
+
+            // Transform court data
+            const courtData = match.court
+            const transformed: Court = {
+                id: courtData.id,
+                name: courtData.name,
+                hourly_rate: courtData.hourly_rate,
+                capacity: courtData.capacity,
+                sport: Array.isArray(courtData.sport) ? courtData.sport[0] : courtData.sport,
+                venue: Array.isArray(courtData.venue) ? courtData.venue[0] : courtData.venue
+            }
+            setCourt(transformed)
+        }
+    }
 
     const loadCourt = async (id: string) => {
         const supabase = createClient()
@@ -86,26 +150,55 @@ function NewBookingForm() {
                 return
             }
 
-            // Create booking
-            const { data: booking, error: bookingError } = await supabase
-                .from('bookings')
-                .insert({
-                    court_id: court.id,
-                    user_id: user.id,
-                    booking_date: bookingDate,
-                    booking_time: bookingTime,
-                    duration_minutes: duration,
-                    total_amount: totalAmount,
-                    commission_amount: Math.round(totalAmount * 0.1),
-                    payment_status: 'pending'
-                })
-                .select()
-                .single()
+            // Create booking data object
+            const bookingData: any = {
+                court_id: court.id,
+                user_id: user.id,
+                booking_date: bookingDate,
+                booking_time: bookingTime,
+                duration_minutes: duration,
+                total_amount: totalAmount,
+                commission_amount: Math.round(totalAmount * 0.1),
+                payment_status: bookingCredit ? 'verified' : 'pending' // Auto-verify if credit
+            }
 
-            if (bookingError) throw bookingError
+            if (matchId) {
+                bookingData.match_id = matchId
+            }
 
-            // Redirect to payment page
-            router.push(`/bookings/${booking.id}/pay`)
+            let resultBooking;
+
+            if (bookingCredit) {
+                // UPDATE existing credit booking
+                const { data, error } = await supabase
+                    .from('bookings')
+                    .update(bookingData)
+                    .eq('id', bookingCredit.id)
+                    .select()
+                    .single()
+
+                if (error) throw error
+                resultBooking = data
+            } else {
+                // INSERT new booking
+                const { data, error } = await supabase
+                    .from('bookings')
+                    .insert(bookingData)
+                    .select()
+                    .single()
+
+                if (error) throw error
+                resultBooking = data
+            }
+
+            // Redirect
+            if (bookingCredit) {
+                // If using credit, skip payment page and go to details
+                router.push(`/bookings/${resultBooking.id}`)
+            } else {
+                router.push(`/bookings/${resultBooking.id}/pay`)
+            }
+
         } catch (err: any) {
             setError(err.message || 'Failed to create booking')
         } finally {

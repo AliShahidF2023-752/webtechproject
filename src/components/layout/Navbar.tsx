@@ -6,12 +6,14 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import type { User } from '@supabase/supabase-js'
 import styles from './Navbar.module.css'
+import { useMatchmaking } from '@/context/MatchmakingContext'
 
 export default function Navbar() {
     const pathname = usePathname()
     const [user, setUser] = useState<User | null>(null)
     const [role, setRole] = useState<string>('player')
     const [isMenuOpen, setIsMenuOpen] = useState(false)
+    const { inQueue, matchFound } = useMatchmaking()
 
     useEffect(() => {
         const supabase = createClient()
@@ -129,6 +131,17 @@ export default function Navbar() {
                 <div className={styles.navActions}>
                     {user ? (
                         <div className={styles.userMenu}>
+                            {inQueue && pathname !== '/matchmaking' && (
+                                <Link href="/matchmaking" className={styles.searchingBadge}>
+                                    <span className={styles.pulseDot}></span>
+                                    <span>Searching...</span>
+                                </Link>
+                            )}
+                            {matchFound && pathname !== '/matchmaking' && (
+                                <Link href="/matchmaking" className={styles.matchFoundBadge}>
+                                    <span>🎉 Match Found!</span>
+                                </Link>
+                            )}
                             <Link href="/profile" className={styles.profileLink}>
                                 <div className={styles.avatar}>
                                     {user.email?.charAt(0).toUpperCase()}
@@ -153,3 +166,8 @@ export default function Navbar() {
         </nav>
     )
 }
+
+// Add these styles to your Navbar.module.css via a proper CSS file edit or append here if valid, 
+// but wait, I can only edit the file. I am editing Navbar.tsx which is TSX.
+// I must edit Navbar.module.css separately. 
+// I will skip adding CSS here and do it in a separate tool call.

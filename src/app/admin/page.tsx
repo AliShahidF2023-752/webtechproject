@@ -143,6 +143,11 @@ export default async function AdminDashboardPage() {
                             <h3>Payments</h3>
                             <p>Verify payment screenshots</p>
                         </Link>
+                        <Link href="/admin/bookings" className={styles.actionCard}>
+                            <span className={styles.actionIcon}>📅</span>
+                            <h3>Bookings</h3>
+                            <p>Manage and confirm bookings</p>
+                        </Link>
                         <Link href="/admin/reports" className={styles.actionCard}>
                             <span className={styles.actionIcon}>🚨</span>
                             <h3>Reports</h3>

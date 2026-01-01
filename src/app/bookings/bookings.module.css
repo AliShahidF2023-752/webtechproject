@@ -305,3 +305,120 @@
         grid-template-columns: 1fr 1fr;
     }
 }
+
+/* Details Page Styles */
+.detailsHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-xl);
+    flex-wrap: wrap;
+    gap: var(--space-md);
+}
+
+.backLink {
+    color: var(--color-text-secondary);
+    text-decoration: none;
+    font-size: var(--text-sm);
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    width: 100%;
+}
+
+.backLink:hover {
+    color: var(--color-text-primary);
+}
+
+.detailsGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-lg);
+}
+
+.card {
+    background: var(--color-bg-card);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    padding: var(--space-xl);
+}
+
+.card h2 {
+    font-size: var(--text-lg);
+    margin-bottom: var(--space-lg);
+    padding-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--color-border);
+    color: var(--color-text-primary);
+}
+
+.infoRow {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: var(--space-md);
+    font-size: var(--text-sm);
+}
+
+.infoRow:last-child {
+    margin-bottom: 0;
+}
+
+.label {
+    color: var(--color-text-secondary);
+}
+
+.value {
+    color: var(--color-text-primary);
+    font-weight: var(--font-medium);
+    text-align: right;
+}
+
+.amount {
+    color: var(--color-accent-primary);
+    font-weight: var(--font-bold);
+    font-size: var(--text-lg);
+}
+
+.mono {
+    font-family: monospace;
+    background: var(--color-bg-tertiary);
+    padding: 2px 6px;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-xs);
+}
+
+.actionArea {
+    margin-top: var(--space-xl);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.primaryBtn {
+    padding: var(--space-md) var(--space-xl);
+    background: var(--gradient-primary);
+    color: var(--color-bg-primary);
+    text-decoration: none;
+    font-weight: var(--font-semibold);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.primaryBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-glow);
+}
+
+.successMessage {
+    margin-top: var(--space-lg);
+    padding: var(--space-md);
+    background: var(--color-success-bg);
+    color: var(--color-success);
+    border-radius: var(--radius-md);
+    text-align: center;
+    font-weight: var(--font-medium);
+}
+
+@media (max-width: 768px) {
+    .detailsGrid {
+        grid-template-columns: 1fr;
+    }
+}

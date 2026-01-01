@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Outfit } from "next/font/google";
 import "@/styles/globals.css";
+import { MatchmakingProvider } from '@/context/MatchmakingContext';
 
 const inter = Inter({
   subsets: ["latin"],
@@ -26,7 +27,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${outfit.variable}`}>
-        {children}
+        <MatchmakingProvider>
+          {children}
+        </MatchmakingProvider>
       </body>
     </html>
   );

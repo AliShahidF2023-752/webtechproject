@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/client'
 import dynamic from 'next/dynamic'
 import Navbar from '@/components/layout/Navbar'
 import styles from './matchmaking.module.css'
+import { useMatchmaking } from '@/context/MatchmakingContext'
 
 // Dynamically import map component to prevent SSR issues
 const MapComponent = dynamic(() => import('@/components/maps/MapView'), {
@@ -34,6 +35,7 @@ interface QueueEntry {
     sport_id: string
     venue_id: string | null
     status: string
+    match_id?: string
     user?: {
         name: string
         elo_rating: number
@@ -45,14 +47,22 @@ function MatchmakingContent() {
     const router = useRouter()
     const searchParams = useSearchParams()
 
+    // Use global matchmaking context
+    const {
+        inQueue,
+        queueData,
+        matchFound,
+        matchData,
+        joinQueue,
+        leaveQueue,
+        declineMatch,
+        loading: contextLoading,
+        error: contextError
+    } = useMatchmaking()
+
     const [sports, setSports] = useState<Sport[]>([])
     const [venues, setVenues] = useState<Venue[]>([])
-    const [loading, setLoading] = useState(false)
-    const [error, setError] = useState('')
-    const [inQueue, setInQueue] = useState(false)
-    const [queueId, setQueueId] = useState<string | null>(null)
-    const [matchFound, setMatchFound] = useState(false)
-    const [matchData, setMatchData] = useState<any>(null)
+    const [localError, setLocalError] = useState('')
 
     // User location
     const [userLocation, setUserLocation] = useState<[number, number]>([31.5204, 74.3587]) // Default: Lahore
@@ -74,9 +84,19 @@ function MatchmakingContent() {
         // Check URL params for pre-selected sport
         const sportParam = searchParams.get('sport')
         if (sportParam) {
-            // Handle sport name from URL
+            // Handle sport name from URL logic if needed
         }
     }, [searchParams])
+
+    // Sync form with queue data if returning to page
+    useEffect(() => {
+        if (inQueue && queueData) {
+            if (queueData.sport_id) setSelectedSport(queueData.sport_id)
+            if (queueData.venue_id) setSelectedVenue(queueData.venue_id)
+            if (queueData.preferred_date) setSelectedDate(queueData.preferred_date)
+            if (queueData.preferred_time) setSelectedTime(queueData.preferred_time)
+        }
+    }, [inQueue, queueData])
 
     const loadSports = async () => {
         const supabase = createClient()
@@ -129,148 +149,45 @@ function MatchmakingContent() {
         return distance <= radius
     })
 
-    const joinQueue = async () => {
+    const handleJoinQueue = async () => {
         if (!selectedSport) {
-            setError('Please select a sport')
+            setLocalError('Please select a sport')
             return
         }
+        setLocalError('')
 
-        setLoading(true)
-        setError('')
-
-        try {
-            const supabase = createClient()
-            const { data: { user } } = await supabase.auth.getUser()
-            if (!user) {
-                router.push('/auth/login')
-                return
-            }
-
-            // Join matchmaking queue
-            const { data, error: queueError } = await supabase
-                .from('matchmaking_queue')
-                .insert({
-                    user_id: user.id,
-                    sport_id: selectedSport,
-                    venue_id: selectedVenue || null,
-                    preferred_date: selectedDate,
-                    preferred_time: selectedTime,
-                    gender_preference: genderPreference,
-                    rating_tolerance: ratingTolerance,
-                    status: 'waiting'
-                })
-                .select()
-                .single()
-
-            if (queueError) throw queueError
-
-            setQueueId(data.id)
-            setInQueue(true)
-
-            // Subscribe to queue updates
-            subscribeToQueue(data.id)
-        } catch (err: any) {
-            setError(err.message || 'Failed to join queue')
-        } finally {
-            setLoading(false)
-        }
-    }
-
-    const subscribeToQueue = (entryId: string) => {
-        const supabase = createClient()
-        const channel = supabase
-            .channel(`queue:${entryId}`)
-            .on(
-                'postgres_changes',
-                {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'matchmaking_queue',
-                    filter: `id=eq.${entryId}`
-                },
-                (payload) => {
-                    if (payload.new.status === 'matched') {
-                        setMatchFound(true)
-                        // Fetch match details
-                        fetchMatchDetails(payload.new)
-                    }
-                }
-            )
-            .subscribe()
-
-        return () => {
-            supabase.removeChannel(channel)
-        }
-    }
-
-    const fetchMatchDetails = async (queueEntry: any) => {
-        // This would fetch the actual match and opponent details
-        setMatchData({
-            venue: venues.find(v => v.id === queueEntry.venue_id),
-            sport: sports.find(s => s.id === queueEntry.sport_id),
-            date: queueEntry.preferred_date,
-            time: queueEntry.preferred_time,
+        await joinQueue({
+            sportId: selectedSport,
+            venueId: selectedVenue || null,
+            date: selectedDate,
+            time: selectedTime,
+            ratingTolerance,
+            genderPreference,
+            lat: userLocation[0],
+            lng: userLocation[1],
+            radiusKm: radius
         })
     }
 
-    const leaveQueue = async () => {
-        if (!queueId) return
-
-        setLoading(true)
-        try {
-            const supabase = createClient()
-            await supabase
-                .from('matchmaking_queue')
-                .update({ status: 'cancelled' })
-                .eq('id', queueId)
-
-            setInQueue(false)
-            setQueueId(null)
-        } catch (err: any) {
-            setError(err.message)
-        } finally {
-            setLoading(false)
+    // Auto-redirect when match is found
+    useEffect(() => {
+        if (matchFound) {
+            const matchId = matchData?.id || matchData?.match_id || queueData?.match_id
+            if (matchId) {
+                router.push(`/bookings/new?match=${matchId}`)
+            }
         }
-    }
-
-    const acceptMatch = async () => {
-        // Accept the match and proceed to booking
-        router.push(`/bookings/new?match=${matchData?.id}`)
-    }
+    }, [matchFound, matchData, queueData, router])
 
     if (matchFound) {
         return (
             <>
                 <Navbar />
                 <div className={styles.page}>
-                    <div className={styles.matchFoundCard}>
-                        <div className={styles.matchFoundIcon}>🎉</div>
+                    <div className={styles.container} style={{ textAlign: 'center', paddingTop: '100px' }}>
+                        <div style={{ fontSize: '3rem', marginBottom: '20px' }}>🎉</div>
                         <h1>Match Found!</h1>
-                        <p>We found a player for you</p>
-
-                        <div className={styles.matchDetails}>
-                            <div className={styles.matchDetail}>
-                                <span className={styles.detailLabel}>Sport</span>
-                                <span className={styles.detailValue}>{matchData?.sport?.icon} {matchData?.sport?.name}</span>
-                            </div>
-                            <div className={styles.matchDetail}>
-                                <span className={styles.detailLabel}>Venue</span>
-                                <span className={styles.detailValue}>{matchData?.venue?.name}</span>
-                            </div>
-                            <div className={styles.matchDetail}>
-                                <span className={styles.detailLabel}>Date & Time</span>
-                                <span className={styles.detailValue}>{matchData?.date} at {matchData?.time}</span>
-                            </div>
-                        </div>
-
-                        <div className={styles.matchActions}>
-                            <button onClick={acceptMatch} className={styles.acceptBtn}>
-                                Accept & Book
-                            </button>
-                            <button onClick={() => { setMatchFound(false); setInQueue(false); }} className={styles.declineBtn}>
-                                Decline
-                            </button>
-                        </div>
+                        <p>Redirecting you to the booking page...</p>
                     </div>
                 </div>
             </>
@@ -286,10 +203,10 @@ function MatchmakingContent() {
                         <h1>Find a Match</h1>
                         <p className={styles.subtitle}>Set your preferences and find nearby players</p>
 
-                        {error && (
+                        {(localError || contextError) && (
                             <div className={styles.error}>
                                 <span>⚠️</span>
-                                {error}
+                                {localError || contextError}
                             </div>
                         )}
 
@@ -393,11 +310,11 @@ function MatchmakingContent() {
                                 </div>
 
                                 <button
-                                    onClick={joinQueue}
-                                    disabled={loading || !selectedSport}
+                                    onClick={handleJoinQueue}
+                                    disabled={contextLoading || !selectedSport}
                                     className={styles.findBtn}
                                 >
-                                    {loading ? 'Joining...' : '🎯 Find Match'}
+                                    {contextLoading ? 'Joining...' : '🎯 Find Match'}
                                 </button>
                             </div>
                         ) : (
@@ -410,12 +327,12 @@ function MatchmakingContent() {
                                 <p>We&apos;re searching for players matching your criteria</p>
 
                                 <div className={styles.queueInfo}>
-                                    <span>Sport: {sports.find(s => s.id === selectedSport)?.name}</span>
+                                    <span>Sport: {sports.find(s => s.id === selectedSport)?.name || queueData?.sport?.name}</span>
                                     <span>Date: {selectedDate}</span>
                                     <span>Time: {selectedTime}</span>
                                 </div>
 
-                                <button onClick={leaveQueue} className={styles.cancelBtn} disabled={loading}>
+                                <button onClick={leaveQueue} className={styles.cancelBtn} disabled={contextLoading}>
                                     Cancel Search
                                 </button>
                             </div>

@@ -15,14 +15,19 @@ export default async function DashboardPage() {
     }
 
     // Check if profile exists - if error or no profile, show a setup prompt instead of redirecting
+    // Check if profile exists - if error or no profile, show a setup prompt instead of redirecting
     const { data: profile, error: profileError } = await supabase
         .from('player_profiles')
-        .select('*, behavior_metrics(*)')
+        .select('*') // Removed behavior_metrics(*) to prevent join errors
         .eq('user_id', user.id)
         .single()
 
     // If no profile, show setup prompt instead of redirecting (prevents loop)
     const needsSetup = !profile || !profile.is_profile_complete || profileError
+
+    if (profileError) {
+        console.error('Dashboard profile check error:', profileError)
+    }
 
     // Only fetch additional data if profile exists
     let playerSports = null
@@ -81,6 +86,11 @@ export default async function DashboardPage() {
                             <div className={styles.setupIcon}>👤</div>
                             <h1>Complete Your Profile</h1>
                             <p>Set up your player profile to start finding matches and booking courts.</p>
+                            {profileError && (
+                                <p style={{ color: 'red', fontSize: '0.8em', marginTop: '10px' }}>
+                                    Debug Error: {profileError.message} ({profileError.code})
+                                </p>
+                            )}
                             <Link href="/profile/setup" className={styles.findMatchBtn}>
                                 Complete Profile Setup →
                             </Link>
