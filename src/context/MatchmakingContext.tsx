@@ -9,6 +9,7 @@ interface QueueEntry {
     user_id: string
     sport_id: string
     venue_id: string | null
+    match_id?: string
     status: string
     preferred_date: string
     preferred_time: string
